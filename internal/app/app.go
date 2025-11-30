@@ -5,7 +5,6 @@ import (
 	"budget/internal/handlers"
 	"budget/internal/models"
 	"budget/internal/storage"
-	"budget/internal/storage/migrations"
 	"context"
 	"log/slog"
 	"net/http"
@@ -26,6 +25,7 @@ type Services struct {
 }
 
 type Storages struct {
+	SubStorage storage.SubscriptionStorage
 }
 
 func NewApp(cfg *config.Config) *App {
@@ -55,11 +55,10 @@ func (a *App) initStorages() {
 		slog.Error("Failed to initialize PG (pool)", "error", err)
 		os.Exit(1)
 	}
-	err = migrations.CreateUserAndTable(context.Background(), poolPG, "myuser", "mypassword", "subscriptions")
-	if err != nil {
-	}
 
-	a.storages = &Storages{}
+	a.storages = &Storages{
+		SubStorage: storage.NewSubscriptionStoragePG(poolPG),
+	}
 }
 
 func (a *App) initServices() {

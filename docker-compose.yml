@@ -1,6 +1,8 @@
 services:
   postgres:
-    image: postgres:15
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
     environment:
       POSTGRES_USER: ${USER_DB_PG} 
       POSTGRES_PASSWORD: ${PASS_DB_PG}

@@ -1,5 +1,13 @@
 package models
 
+type Subscription struct {
+	ID          int     `json:"id"`
+	ServiceName string  `json:"service_name"`
+	Price       int     `json:"price"`
+	UserID      string  `json:"user_id"`
+	StartDate   string  `json:"start_date"`
+	EndDate     *string `json:"end_date,omitempty"`
+}
 type CreateSubscriptionRequest struct {
 	ServiceName string  `json:"service_name"`
 	Price       int     `json:"price"`
@@ -8,18 +16,13 @@ type CreateSubscriptionRequest struct {
 	EndDate     *string `json:"end_date,omitempty"`
 }
 
-type SubscriptionPeriod struct {
-	ServiceName string `json:"service_name"`
-	StartDate   string `json:"start_date"`
-	EndDate     string `json:"end_date"`
-}
-
 type TotalCostRequest struct {
-	UserID        *string              `json:"user_id,omitempty"`
-	Subscriptions []SubscriptionPeriod `json:"subscriptions"`
+	UserID        *string  `json:"user_id,omitempty"`
+	StartDate     string   `json:"start_date"`
+	EndDate       string   `json:"end_date"`
+	Subscriptions []string `json:"subscriptions"`
 }
 
 type TotalCostResponse struct {
-	Total  int      `json:"total"`
-	Errors []string `json:"errors"`
+	Total int `json:"total"`
 }
