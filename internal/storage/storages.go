@@ -6,10 +6,10 @@ import (
 )
 
 type SubscriptionStorage interface {
-	CreateSubscription(ctx context.Context, req *models.CreateSubscriptionRequest) (int, error)
-	GetSubscriptionsWithParam(ctx context.Context, req *models.TotalCostRequest) (*models.TotalCostResponse, error)
-	GetSubscriptionByID(ctx context.Context, id int) (*models.Subscription, error)
-	UpdateSubscriptionByID(ctx context.Context, id int, req *models.CreateSubscriptionRequest) error
+	CreateSubscription(ctx context.Context, req *models.SubscriptionForStorage) (int, error)
+	GetSubscriptionsWithParam(ctx context.Context, req *models.TotalCostRequestForStorage) (*models.TotalCostResponse, error)
+	GetSubscriptionByID(ctx context.Context, id int) (*models.SubscriptionForStorage, error)
+	UpdateSubscriptionByID(ctx context.Context, req *models.SubscriptionForStorageWithId) error
 	DeleteSubscriptionByID(ctx context.Context, id int) error
-	ListSubscriptionsByUserID(ctx context.Context, userID string) ([]*models.Subscription, error)
+	ListSubscriptionsByUserID(ctx context.Context, userID string) ([]*models.SubscriptionForStorageWithId, error)
 }

@@ -19,19 +19,10 @@ func NewSubscriptionStoragePG(pool *pgxpool.Pool) *SubscriptionStoragePG {
 	return &SubscriptionStoragePG{pool: pool}
 }
 
-func (s *SubscriptionStoragePG) CreateSubscription(ctx context.Context, req *models.CreateSubscriptionRequest) (int, error) {
-	startDate, err := time.Parse("01-2006", req.StartDate)
-	if err != nil {
-		return -1, fmt.Errorf("некорректный формат start_date (ожидается MM-YYYY): %w", err)
-	}
-
+func (s *SubscriptionStoragePG) CreateSubscription(ctx context.Context, req *models.SubscriptionForStorage) (int, error) {
 	var endDate pgtype.Date
 	if req.EndDate != nil {
-		endDateParsed, err := time.Parse("01-2006", *req.EndDate)
-		if err != nil {
-			return -1, fmt.Errorf("некорректный формат end_date (ожидается MM-YYYY): %w", err)
-		}
-		endDate = pgtype.Date{Time: endDateParsed, Valid: true}
+		endDate = pgtype.Date{Time: *req.EndDate, Valid: true}
 	} else {
 		endDate = pgtype.Date{Valid: false}
 	}
@@ -43,11 +34,11 @@ func (s *SubscriptionStoragePG) CreateSubscription(ctx context.Context, req *mod
 	`
 
 	var id int
-	err = s.pool.QueryRow(ctx, query,
+	err := s.pool.QueryRow(ctx, query,
 		req.ServiceName,
 		req.Price,
 		req.UserID,
-		startDate,
+		req.StartDate,
 		endDate,
 	).Scan(&id)
 	if err != nil {
@@ -57,33 +48,29 @@ func (s *SubscriptionStoragePG) CreateSubscription(ctx context.Context, req *mod
 	return id, nil
 }
 
-func (s *SubscriptionStoragePG) GetSubscriptionsWithParam(ctx context.Context, req *models.TotalCostRequest) (*models.TotalCostResponse, error) {
-	periodStart, err := time.Parse("01-2006", req.StartDate)
-	if err != nil {
-		return nil, fmt.Errorf("некорректный формат start_date периода (MM-YYYY): %w", err)
+func (s *SubscriptionStoragePG) GetSubscriptionsWithParam(ctx context.Context, req *models.TotalCostRequestForStorage) (*models.TotalCostResponse, error) {
+	var endDate pgtype.Date
+	if req.EndDate != nil {
+		endDate = pgtype.Date{Time: *req.EndDate, Valid: true}
+	} else {
+		endDate = pgtype.Date{Valid: false}
 	}
-
-	periodEnd, err := time.Parse("01-2006", req.EndDate)
-	if err != nil {
-		return nil, fmt.Errorf("некорректный формат end_date периода (MM-YYYY): %w", err)
-	}
-
 	query := `
 		SELECT COALESCE(SUM(price), 0)
 		FROM subscriptions
-		WHERE ($1 = '' OR user_id = $1)
+		WHERE ($1::text IS NULL OR $1 = '' OR user_id = $1)
 		  AND start_date <= $3
 		  AND (end_date IS NULL OR end_date >= $2)
 		  AND ($4::text[] IS NULL OR service_name = ANY($4))
 	`
 
 	var total int
-	err = s.pool.QueryRow(ctx, query,
+	err := s.pool.QueryRow(ctx, query,
 		req.UserID,
-		periodStart,
-		periodEnd,
+		req.StartDate,
+		endDate,
 		req.Subscriptions,
-	).Scan(total)
+	).Scan(&total)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка при расчёте общей стоимости: %w", err)
 	}
@@ -91,18 +78,17 @@ func (s *SubscriptionStoragePG) GetSubscriptionsWithParam(ctx context.Context, r
 	return &models.TotalCostResponse{Total: total}, nil
 }
 
-func (s *SubscriptionStoragePG) GetSubscriptionByID(ctx context.Context, id int) (*models.Subscription, error) {
+func (s *SubscriptionStoragePG) GetSubscriptionByID(ctx context.Context, id int) (*models.SubscriptionForStorage, error) {
 	query := `
-		SELECT id, service_name, price, user_id, start_date, end_date
+		SELECT service_name, price, user_id, start_date, end_date
 		FROM subscriptions
 		WHERE id = $1
 	`
 
-	var res models.Subscription
+	var res models.SubscriptionForStorage
 	startDate := pgtype.Date{}
 	endDate := pgtype.Date{}
 	err := s.pool.QueryRow(ctx, query, id).Scan(
-		&res.ID,
 		&res.ServiceName,
 		&res.Price,
 		&res.UserID,
@@ -113,33 +99,23 @@ func (s *SubscriptionStoragePG) GetSubscriptionByID(ctx context.Context, id int)
 		return nil, fmt.Errorf("ошибка получения подписки по id %d: %w", id, err)
 	}
 
-	dateString := startDate.Time.Format("01-2006")
-	res.EndDate = &dateString
+	dateString := startDate.Time
+	res.StartDate = dateString
 
 	if !endDate.Valid {
 		res.EndDate = nil
 	} else {
-		dateString := endDate.Time.Format("01-2006")
+		dateString := endDate.Time
 		res.EndDate = &dateString
 	}
 
 	return &res, nil
 }
 
-// -----------------------------------------
-func (s *SubscriptionStoragePG) UpdateSubscriptionByID(ctx context.Context, id int, req *models.CreateSubscriptionRequest) error {
-	startDate, err := time.Parse("01-2006", req.StartDate)
-	if err != nil {
-		return fmt.Errorf("некорректный формат start_date (ожидается MM-YYYY): %w", err)
-	}
-
+func (s *SubscriptionStoragePG) UpdateSubscriptionByID(ctx context.Context, req *models.SubscriptionForStorageWithId) error {
 	var endDate pgtype.Date
 	if req.EndDate != nil {
-		endDateParsed, err := time.Parse("01-2006", *req.EndDate)
-		if err != nil {
-			return fmt.Errorf("некорректный формат end_date (ожидается MM-YYYY): %w", err)
-		}
-		endDate = pgtype.Date{Time: endDateParsed, Valid: true}
+		endDate = pgtype.Date{Time: *req.EndDate, Valid: true}
 	} else {
 		endDate = pgtype.Date{Valid: false}
 	}
@@ -153,16 +129,16 @@ func (s *SubscriptionStoragePG) UpdateSubscriptionByID(ctx context.Context, id i
 	result, err := s.pool.Exec(ctx, query,
 		req.ServiceName,
 		req.Price,
-		startDate,
+		req.StartDate,
 		endDate,
-		id,
+		req.ID,
 	)
 	if err != nil {
 		return fmt.Errorf("ошибка при обновлении подписки: %w", err)
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("подписка с id %d не найдена", id)
+		return fmt.Errorf("подписка с id %d не найдена", req.ID)
 	}
 
 	return nil
@@ -186,7 +162,7 @@ func (s *SubscriptionStoragePG) DeleteSubscriptionByID(ctx context.Context, id i
 	return nil
 }
 
-func (s *SubscriptionStoragePG) ListSubscriptionsByUserID(ctx context.Context, userID string) ([]*models.Subscription, error) {
+func (s *SubscriptionStoragePG) ListSubscriptionsByUserID(ctx context.Context, userID string) ([]*models.SubscriptionForStorageWithId, error) {
 	query := `
 		SELECT id, service_name, price, user_id, start_date, end_date
 		FROM subscriptions
@@ -199,9 +175,9 @@ func (s *SubscriptionStoragePG) ListSubscriptionsByUserID(ctx context.Context, u
 	}
 	defer rows.Close()
 
-	var subscriptions []*models.Subscription
+	var subscriptions []*models.SubscriptionForStorageWithId
 	for rows.Next() {
-		var sub models.Subscription
+		var sub models.SubscriptionForStorageWithId
 		var startDate time.Time
 		var endDate pgtype.Date
 
@@ -217,10 +193,9 @@ func (s *SubscriptionStoragePG) ListSubscriptionsByUserID(ctx context.Context, u
 			return nil, fmt.Errorf("ошибка сканирования строки: %w", err)
 		}
 
-		// Форматируем даты в строковый формат MM-YYYY
-		sub.StartDate = startDate.Format("01-2006")
+		sub.StartDate = startDate
 		if endDate.Valid {
-			dateStr := endDate.Time.Format("01-2006")
+			dateStr := endDate.Time
 			sub.EndDate = &dateStr
 		}
 

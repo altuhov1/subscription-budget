@@ -4,6 +4,7 @@ import (
 	"budget/internal/config"
 	"budget/internal/handlers"
 	"budget/internal/models"
+	"budget/internal/services"
 	"budget/internal/storage"
 	"context"
 	"log/slog"
@@ -22,6 +23,7 @@ type App struct {
 }
 
 type Services struct {
+	SubService services.SubManager
 }
 
 type Storages struct {
@@ -62,11 +64,13 @@ func (a *App) initStorages() {
 }
 
 func (a *App) initServices() {
-	a.services = &Services{}
+	a.services = &Services{
+		SubService: services.NewPullRequestService(a.storages.SubStorage),
+	}
 }
 
 func (a *App) initHTTP() {
-	handler, err := handlers.NewHandler()
+	handler, err := handlers.NewHandler(a.services.SubService)
 	if err != nil {
 		slog.Error("Failed to create handler", "error", err)
 		os.Exit(1)
@@ -87,9 +91,12 @@ func (a *App) setupRoutes(handler *handlers.Handler) http.Handler {
 	mux := http.NewServeMux()
 
 	apiRoutes := map[string]http.HandlerFunc{
-		// "/team/add": handler.AddTeam,
-		// "/team/get": handler.GetTeam,
-
+		"/api/subs/create":          handler.CreateSubscriptionHandler,
+		"/api/get-subs/param":       handler.GetSubWithParamHandler,
+		"/api/get-subs/user-id/one": handler.GetSubsByIDHandle,
+		"/api/get-subs/user-id/all": handler.AllSubsByUserIDHandle,
+		"/api/subs/update":          handler.UpdateSubByIDHandler,
+		"/api/subs/delete":          handler.DeleteSubnByIDHandle,
 	}
 	for path, handlerFunc := range apiRoutes {
 		mux.HandleFunc(path, handlerFunc)
