@@ -58,7 +58,9 @@ func (s *SubService) GetSubscriptionsWithParam(ctx context.Context, req *models.
 		}
 		endDateParsed = &t
 	} else {
-		endDateParsed = nil
+		now := time.Now()
+		t := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+		endDateParsed = &t
 	}
 	reqS := &models.TotalCostRequestForStorage{
 		UserID:    req.UserID,

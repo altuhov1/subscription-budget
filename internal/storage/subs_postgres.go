@@ -56,12 +56,19 @@ func (s *SubscriptionStoragePG) GetSubscriptionsWithParam(ctx context.Context, r
 		endDate = pgtype.Date{Valid: false}
 	}
 	query := `
-		SELECT COALESCE(SUM(price), 0)
+		SELECT COALESCE(SUM(
+			price * (
+				EXTRACT(YEAR FROM AGE(LEAST(end_date, $3), GREATEST(start_date, $2))) * 12
+				+ 1 + EXTRACT(MONTH FROM AGE(LEAST(end_date, $3), GREATEST(start_date, $2)))
+			)
+		), 0) AS total_cost
 		FROM subscriptions
-		WHERE ($1::text IS NULL OR $1 = '' OR user_id = $1)
-		  AND start_date <= $3
-		  AND (end_date IS NULL OR end_date >= $2)
-		  AND ($4::text[] IS NULL OR service_name = ANY($4))
+		WHERE ($1::text IS NULL OR $1 = '' OR user_id = $1::uuid)
+		AND start_date <= $3
+		AND (end_date IS NULL OR end_date >= $2)
+		AND ($4::text[] IS NULL OR service_name = ANY($4))
+		AND start_date < $3
+		AND (end_date IS NULL OR end_date > $2)
 	`
 
 	var total int
