@@ -53,9 +53,7 @@ docker compose up --build
 
 ## Тестирование
 ```bash
-make e2e 
-
-make test 
+make e2e  
 ```
 
 ----
