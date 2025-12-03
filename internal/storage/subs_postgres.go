@@ -67,8 +67,6 @@ func (s *SubscriptionStoragePG) GetSubscriptionsWithParam(ctx context.Context, r
 		AND start_date <= $3
 		AND (end_date IS NULL OR end_date >= $2)
 		AND ($4::text[] IS NULL OR service_name = ANY($4))
-		AND start_date < $3
-		AND (end_date IS NULL OR end_date > $2)
 	`
 
 	var total int

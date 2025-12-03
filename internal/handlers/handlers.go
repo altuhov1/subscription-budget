@@ -22,7 +22,7 @@ func NewHandler(SubManager services.SubManager) (*Handler, error) {
 func (h *Handler) CreateSubscriptionHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", "POST")
-		http.Error(w, "Метод не разрешен. Используйте POST", http.StatusMethodNotAllowed)
+		http.Error(w, "The method is not allowed. Use the POST", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -76,7 +76,7 @@ func (h *Handler) GetSubWithParamHandler(w http.ResponseWriter, r *http.Request)
 func (h *Handler) AllSubsByUserIDHandle(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", "POST")
-		http.Error(w, "Метод не разрешен. Используйте POST", http.StatusMethodNotAllowed)
+		http.Error(w, "The method is not allowed. Use the POST", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -110,7 +110,7 @@ func (h *Handler) AllSubsByUserIDHandle(w http.ResponseWriter, r *http.Request) 
 func (h *Handler) GetSubsByIDHandle(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", "POST")
-		http.Error(w, "Метод не разрешен. Используйте POST", http.StatusMethodNotAllowed)
+		http.Error(w, "The method is not allowed. Use the POST", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -145,7 +145,7 @@ func (h *Handler) GetSubsByIDHandle(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) UpdateSubByIDHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPut {
 		w.Header().Set("Allow", "PUT")
-		http.Error(w, "Метод не разрешен. Используйте PUT", http.StatusMethodNotAllowed)
+		http.Error(w, "The method is not allowed. Use the PUT", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -174,7 +174,7 @@ func (h *Handler) UpdateSubByIDHandler(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) DeleteSubnByIDHandle(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		w.Header().Set("Allow", "DELETE")
-		http.Error(w, "Метод не разрешен. Используйте DELETE", http.StatusMethodNotAllowed)
+		http.Error(w, "The method is not allowed. Use the DELETE", http.StatusMethodNotAllowed)
 		return
 	}
 

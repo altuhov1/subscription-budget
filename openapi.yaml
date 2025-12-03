@@ -1,0 +1,259 @@
+openapi: 3.0.0
+info:
+  title: Subscription Management API
+  description: API для управления подписками пользователей
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /api/subs/create:
+    post:
+      summary: Создать подписку
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [service_name, price, user_id, start_date, end_date]
+              properties:
+                service_name:
+                  type: string
+                  example: "Netflix"
+                price:
+                  type: integer
+                  example: 100
+                user_id:
+                  type: string
+                  format: uuid
+                  example: "550e8400-e29b-41d4-a716-446655440001"
+                start_date:
+                  type: string
+                  pattern: '^(0[1-9]|1[0-2])-20\d{2}$'
+                  example: "01-2025"
+                end_date:
+                  type: string
+                  pattern: '^(0[1-9]|1[0-2])-20\d{2}$'
+                  example: "12-2025"
+                  nullable: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  numberOfSub:
+                    type: integer
+                    example: 1
+        '400':
+          description: Bad Request
+        '405':
+          description: Method Not Allowed
+
+  /api/get-subs/param:
+    post:
+      summary: Рассчитать общую стоимость
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, start_date, end_date,  subscriptions]
+              properties:
+                user_id:
+                  type: string
+                  format: uuid
+                  example: "550e8400-e29b-41d4-a716-446655440001"
+                start_date:
+                  type: string
+                  pattern: '^(0[1-9]|1[0-2])-20\d{2}$'
+                  example: "01-2025"
+                end_date:
+                  type: string
+                  pattern: '^(0[1-9]|1[0-2])-20\d{2}$'
+                  example: "12-2025"
+                  nullable: true
+                subscriptions:
+                  type: array
+                  items:
+                    type: string
+                  example: ["Netflix", "Spotify"]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    example: 3400
+        '400':
+          description: Bad Request
+        '405':
+          description: Method Not Allowed
+
+  /api/get-subs/user-id/one:
+    post:
+      summary: Получить подписку по ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  example: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service_name:
+                    type: string
+                    example: "Netflix"
+                  price:
+                    type: integer
+                    example: 100
+                  user_id:
+                    type: string
+                    format: uuid
+                    example: "550e8400-e29b-41d4-a716-446655440001"
+                  start_date:
+                    type: string
+                    example: "01-2025"
+                  end_date:
+                    type: string
+                    example: "12-2025"
+                    nullable: true
+        '400':
+          description: Bad Request
+        '404':
+          description: Not Found
+        '405':
+          description: Method Not Allowed
+
+  /api/get-subs/user-id/all:
+    post:
+      summary: Получить все подписки пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id]
+              properties:
+                user_id:
+                  type: string
+                  format: uuid
+                  example: "550e8400-e29b-41d4-a716-446655440001"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    service_name:
+                      type: string
+                      example: "Netflix"
+                    price:
+                      type: integer
+                      example: 100
+                    user_id:
+                      type: string
+                      format: uuid
+                      example: "550e8400-e29b-41d4-a716-446655440001"
+                    start_date:
+                      type: string
+                      example: "01-2025"
+                    end_date:
+                      type: string
+                      example: "12-2025"
+                      nullable: true
+        '400':
+          description: Bad Request
+        '405':
+          description: Method Not Allowed
+
+  /api/subs/update:
+    put:
+      summary: Обновить подписку
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, service_name, price, user_id, start_date]
+              properties:
+                id:
+                  type: integer
+                  example: 1
+                service_name:
+                  type: string
+                  example: "Netflix Premium"
+                price:
+                  type: integer
+                  example: 150
+                user_id:
+                  type: string
+                  format: uuid
+                  example: "550e8400-e29b-41d4-a716-446655440001"
+                start_date:
+                  type: string
+                  pattern: '^(0[1-9]|1[0-2])-20\d{2}$'
+                  example: "03-2025"
+                end_date:
+                  type: string
+                  pattern: '^(0[1-9]|1[0-2])-20\d{2}$'
+                  example: "12-2025"
+                  nullable: true
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+        '405':
+          description: Method Not Allowed
+
+  /api/subs/delete:
+    delete:
+      summary: Удалить подписку
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  example: 1
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+        '405':
+          description: Method Not Allowed

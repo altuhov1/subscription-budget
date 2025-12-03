@@ -13,8 +13,8 @@ type Config struct {
 	NameFileProcessTasksLinks string `env:"PROCESS_LINKS_FILE" envDefault:"storage/ProcessTasksLinks.json"`
 	NameFileProcessTasksNums  string `env:"PROCESS_NUMS_FILE" envDefault:"storage/ProcessTasksNums.json"`
 	PG_DBHost                 string `env:"DB_PG_HOST" envDefault:"postgres"`
-	PG_DBUser                 string `env:"USER_DB_PG" envDefault:""`
-	PG_DBPassword             string `env:"PASS_DB_PG" envDefault:""`
+	PG_DBUser                 string `env:"APP_USER" envDefault:""`
+	PG_DBPassword             string `env:"APP_PASSWORD" envDefault:""`
 	PG_DBName                 string `env:"NAME_DB_PG" envDefault:"webdev"`
 	PG_DBSSLMode              string `env:"DB_PG_SSLMODE" envDefault:"disable"`
 	PG_PORT                   string `env:"DB_PG_PORT" envDefault:"5432"`

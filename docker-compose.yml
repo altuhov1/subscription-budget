@@ -4,13 +4,13 @@ services:
       context: .
       dockerfile: Dockerfile.postgres
     environment:
-      POSTGRES_USER: ${USER_DB_PG} 
+      POSTGRES_USER: ${USER_DB_PG}
       POSTGRES_PASSWORD: ${PASS_DB_PG}
       POSTGRES_DB: ${NAME_DB_PG}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\" || exit 1"]
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -18,16 +18,42 @@ services:
     networks:
       - internal
 
-  app:
-    networks:
-      - internal
-      - public
-    build: 
+  migrate:
+    build:
       context: .
-      dockerfile: Dockerfile.golang
+      dockerfile: Dockerfile.migrate
+    environment:
+      DB_PG_HOST: postgres
+      USER_DB_PG: user
+      PASS_DB_PG: 1111
+      NAME_DB_PG: pullrequestdb
+      APP_USER: myapp_user
+      APP_PASSWORD: secure_password_123
     depends_on:
       postgres:
         condition: service_healthy
+    command: ["up"]
+    networks:
+      - internal
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.golang
+    environment:
+      DB_HOST: ${DB_PG_HOST}
+      DB_PORT: 5432
+      DB_USER: ${APP_USER}
+      DB_PASSWORD: ${APP_PASSWORD}
+      DB_NAME: ${NAME_DB_PG}
+      RUN_POSTGRES_TESTS: ${RUN_POSTGRES_TESTS}
+      PORT: ${PORT_APP}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - internal
+      - public
 
   caddy:
     image: caddy:2-alpine
@@ -35,7 +61,7 @@ services:
       - "8080:8080"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data      
+      - caddy_data:/data    
       - caddy_config:/config
       - caddy_logs:/var/log/caddy
     depends_on:
@@ -49,9 +75,8 @@ networks:
     internal: true
   public:
 
-
 volumes:
   postgres_data:
+  caddy_data:
+  caddy_config:
   caddy_logs:
-  caddy_data: 
-  caddy_config: 

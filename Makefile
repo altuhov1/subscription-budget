@@ -11,10 +11,6 @@ build:
 	$(GO) build -o $(BUILD_DIR)/$(BINARY_NAME) $(CMD_PATH)
 clean:
 	rm -rf $(BUILD_DIR)
-
-test:
-	$(GO) test ./...
-
 deps:
 	$(GO) mod tidy && $(GO) mod download
 
