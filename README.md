@@ -47,6 +47,7 @@ REST API для управления подписками пользовател
 cp .env.example .env
 docker compose up --build 
 ```
+Миграции накатываются автоматически.
 
 ----
 
