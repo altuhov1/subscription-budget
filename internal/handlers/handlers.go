@@ -49,9 +49,9 @@ func (h *Handler) CreateSubscriptionHandler(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *Handler) GetSubWithParamHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.Header().Set("Allow", "POST")
-		http.Error(w, "Метод не разрешен. Используйте POST", http.StatusMethodNotAllowed)
+	if r.Method != http.MethodGet {
+		w.Header().Set("Allow", "GET")
+		http.Error(w, "Метод не разрешен. Используйте GET", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -74,9 +74,9 @@ func (h *Handler) GetSubWithParamHandler(w http.ResponseWriter, r *http.Request)
 	json.NewEncoder(w).Encode(resp)
 }
 func (h *Handler) AllSubsByUserIDHandle(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.Header().Set("Allow", "POST")
-		http.Error(w, "The method is not allowed. Use the POST", http.StatusMethodNotAllowed)
+	if r.Method != http.MethodGet {
+		w.Header().Set("Allow", "GET")
+		http.Error(w, "The method is not allowed. Use the GET", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -108,9 +108,9 @@ func (h *Handler) AllSubsByUserIDHandle(w http.ResponseWriter, r *http.Request) 
 	json.NewEncoder(w).Encode(subs)
 }
 func (h *Handler) GetSubsByIDHandle(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.Header().Set("Allow", "POST")
-		http.Error(w, "The method is not allowed. Use the POST", http.StatusMethodNotAllowed)
+	if r.Method != http.MethodGet {
+		w.Header().Set("Allow", "GET")
+		http.Error(w, "The method is not allowed. Use the GET", http.StatusMethodNotAllowed)
 		return
 	}
 

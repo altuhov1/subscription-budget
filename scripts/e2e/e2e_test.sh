@@ -30,7 +30,7 @@ SUB_ID_2=$(echo "$body" | jq -r '.numberOfSub' 2>/dev/null)
 echo
 
 echo "3. /api/get-subs/param (Подсчет двух подписок)"
-resp=$(curl -s -w "\n%{http_code}" -X POST "$URL/api/get-subs/param" \
+resp=$(curl -s -w "\n%{http_code}" -X GET "$URL/api/get-subs/param" \
   -H "Content-Type: application/json" \
   -d '{"user_id":"'"$USER_ID"'","start_date":"01-2025","subscriptions":["Netflix","Spotify"]}')
 http_code=$(echo "$resp" | tail -n1)
@@ -40,7 +40,7 @@ echo "   → Ответ: $body"
 echo
 
 echo "4. /api/get-subs/user-id/one (Первая подписка)"
-resp=$(curl -s -w "\n%{http_code}" -X POST "$URL/api/get-subs/user-id/one" \
+resp=$(curl -s -w "\n%{http_code}" -X GET "$URL/api/get-subs/user-id/one" \
   -H "Content-Type: application/json" \
   -d '{"id":'"$SUB_ID_1"'}')
 http_code=$(echo "$resp" | tail -n1)
@@ -50,7 +50,7 @@ echo "   → Ответ: $body"
 echo
 
 echo "5.  /api/get-subs/user-id/one (Вторая подписка)"
-resp=$(curl -s -w "\n%{http_code}" -X POST "$URL/api/get-subs/user-id/one" \
+resp=$(curl -s -w "\n%{http_code}" -X GET "$URL/api/get-subs/user-id/one" \
   -H "Content-Type: application/json" \
   -d '{"id":'"$SUB_ID_2"'}')
 http_code=$(echo "$resp" | tail -n1)
@@ -60,7 +60,7 @@ echo "   → Ответ: $body"
 echo
 
 echo "6. /api/get-subs/user-id/all (Ожидаем 2 подписки)"
-resp=$(curl -s -w "\n%{http_code}" -X POST "$URL/api/get-subs/user-id/all" \
+resp=$(curl -s -w "\n%{http_code}" -X GET "$URL/api/get-subs/user-id/all" \
   -H "Content-Type: application/json" \
   -d '{"user_id":"'"$USER_ID"'"}')
 http_code=$(echo "$resp" | tail -n1)
@@ -80,7 +80,7 @@ echo "   → Код: $http_code"
 echo
 
 echo "8. /api/get-subs/param (Подсчет после обновления)"
-resp=$(curl -s -w "\n%{http_code}" -X POST "$URL/api/get-subs/param" \
+resp=$(curl -s -w "\n%{http_code}" -X GET "$URL/api/get-subs/param" \
   -H "Content-Type: application/json" \
   -d '{"user_id":"'"$USER_ID"'","start_date":"01-2025","subscriptions":["Netflix Premium","Spotify"]}')
 http_code=$(echo "$resp" | tail -n1)
@@ -110,7 +110,7 @@ echo "   → Код: $http_code"
 echo
 
 echo "11. /api/get-subs/user-id/all (Проверка что подписок не осталось)"
-resp=$(curl -s -w "\n%{http_code}" -X POST "$URL/api/get-subs/user-id/all" \
+resp=$(curl -s -w "\n%{http_code}" -X GET "$URL/api/get-subs/user-id/all" \
   -H "Content-Type: application/json" \
   -d '{"user_id":"'"$USER_ID"'"}')
 http_code=$(echo "$resp" | tail -n1)

@@ -55,7 +55,7 @@ paths:
           description: Method Not Allowed
 
   /api/get-subs/param:
-    post:
+    get:
       summary: Рассчитать общую стоимость
       requestBody:
         required: true
@@ -100,7 +100,7 @@ paths:
           description: Method Not Allowed
 
   /api/get-subs/user-id/one:
-    post:
+    get:
       summary: Получить подписку по ID
       requestBody:
         required: true
@@ -146,7 +146,7 @@ paths:
           description: Method Not Allowed
 
   /api/get-subs/user-id/all:
-    post:
+    get:
       summary: Получить все подписки пользователя
       requestBody:
         required: true
