@@ -40,14 +40,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.golang
-    environment:
-      DB_HOST: ${DB_PG_HOST}
-      DB_PORT: 5432
-      DB_USER: ${APP_USER}
-      DB_PASSWORD: ${APP_PASSWORD}
-      DB_NAME: ${NAME_DB_PG}
-      RUN_POSTGRES_TESTS: ${RUN_POSTGRES_TESTS}
-      PORT: ${PORT_APP}
     depends_on:
       migrate:
         condition: service_completed_successfully
